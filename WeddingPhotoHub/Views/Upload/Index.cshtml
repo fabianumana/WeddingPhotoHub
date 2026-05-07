@@ -1,0 +1,168 @@
+﻿@model List<string>
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Subir Foto";
+}
+
+<div id="envelopeOverlay" role="button" aria-label="Abrir invitación" tabindex="0">
+    <div class="envelope" id="pageEnvelope" aria-hidden="false">
+        <div class="flap">Abrir</div>
+        <div class="body">Nuestra Boda</div>
+        <div class="inner">💌 Haz clic para entrar</div>
+    </div>
+</div>
+
+<div id="mainContent" aria-hidden="true">
+    <div class="container mt-5">
+        <div class="card shadow p-4">
+            <h2 class="text-center mt-4">💍 Nuestra Boda</h2>
+            <p class="text-center">Comparte tus recuerdos con nosotros 📸</p>
+
+            @if (TempData["Error"] != null)
+            {
+                <p style="color:red;">@TempData["Error"]</p>
+            }
+
+            @if (TempData["Mensaje"] != null)
+            {
+                <p style="color:green;">@TempData["Mensaje"]</p>
+            }
+
+            <form asp-action="Subir" method="post" enctype="multipart/form-data" class="text-center mt-4">
+                @Html.AntiForgeryToken()
+                <input type="file" name="archivo" class="form-control mb-3" accept="image/*" onchange="previewImage(event)" />
+                <img id="preview" style="max-width:200px; display:none; margin:auto;" class="mb-3 rounded shadow" />
+                <button type="submit" class="btn btn-primary btn-lg px-5">Subir Foto</button>
+            </form>
+
+            <h3 class="mt-5 text-center">📸 Galería</h3>
+
+            <div class="gallery-grid mt-4">
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var foto in Model)
+                    {
+                        <div class="gallery-item">
+                            
+                            <img src="@foto" class="img-fluid rounded-top preview-img" loading="lazy" onclick="openImage('@foto')" />
+                            
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12 text-center">
+                        <p>Aún no hay fotos... ¡sé el primero en subir una! 📸</p>
+                    </div>
+                }
+            </div>
+        </div>
+        <a href="/Auth/Login" class="admin-hidden-link">⚙️</a>
+    </div>
+</div>
+
+<script>
+  (function () {
+    const overlay = document.getElementById('envelopeOverlay');
+    const envelope = document.getElementById('pageEnvelope');
+    const main = document.getElementById('mainContent');
+
+    // Debug: ensure elements exist
+    // console.log('envelope init', { overlay, envelope, main });
+
+    if (!overlay || !envelope || !main) return;
+
+    // Force overlay above other elements in case of z-index conflicts
+    overlay.style.zIndex = overlay.style.zIndex || '9999';
+
+    // Asegura que el contenido principal esté oculto hasta la interacción
+    main.classList.remove('visible');
+    main.setAttribute('aria-hidden', 'true');
+
+    const FALLBACK_MS = 1400;
+    let opening = false;
+
+    function revealPage() {
+      if (opening) return;
+      opening = true;
+
+      // trigger CSS animation
+      envelope.classList.add('open');
+
+          function finish() {
+        if (!overlay) return;
+
+        overlay.classList.add('fade-out');
+
+        // 🔥 CLAVE: desactivar interacción inmediatamente
+        overlay.style.pointerEvents = 'none';
+
+        // 🔥 MÁS SEGURO: quitarlo DEL TODO sin esperar
+        setTimeout(() => {
+            if (overlay.parentNode) {
+                overlay.remove(); // más limpio
+            }
+        }, 300);
+
+        main.classList.add('visible');
+        main.setAttribute('aria-hidden', 'false');
+    }
+
+      // listen for animation end on the flap; also use fallback
+      envelope.addEventListener('animationend', function ae() { finish(); envelope.removeEventListener('animationend', ae); });
+      setTimeout(finish, FALLBACK_MS);
+    }
+
+    // click en overlay y en la propia carta
+    overlay.addEventListener('click', function (e) { e.preventDefault(); revealPage(); });
+    envelope.addEventListener('click', function (e) { e.stopPropagation(); revealPage(); });
+
+    // keyboard
+    overlay.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        revealPage();
+      }
+    });
+
+    overlay.tabIndex = 0;
+  })();
+
+          function previewImage(event) {
+        const img = document.getElementById('preview');
+        const file = event.target.files[0];
+
+        if (file) {
+            img.src = URL.createObjectURL(file);
+            img.style.display = 'block';
+        }
+    }
+
+           function openImage(src) {
+        const modal = document.createElement('div');
+
+        modal.style = `
+            position:fixed;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+            background:rgba(0,0,0,0.9);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            z-index:9999;
+            cursor:zoom-out;
+        `;
+
+        modal.innerHTML = `
+            <img src="${src}" style="max-width:90%; max-height:90%; border-radius:12px;">
+        `;
+
+        modal.onclick = () => modal.remove();
+
+        document.body.appendChild(modal);
+    }
+</script>
