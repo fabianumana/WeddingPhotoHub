@@ -44,38 +44,40 @@ namespace WeddingPhotoHub.Controllers
 
         [ValidateAntiForgeryToken]
         [HttpPost]
-        [RequestSizeLimit(10485760)]
-        public async Task<IActionResult> Subir(IFormFile archivo)
+        [RequestSizeLimit(52428800)] // 50MB total
+        public async Task<IActionResult> Subir(List<IFormFile> archivos)
         {
-            if (archivo != null && archivo.Length > 0)
+            if (archivos == null || !archivos.Any())
             {
-                var ruta = Path.Combine(_env.WebRootPath, "uploads");
+                TempData["Error"] = "No seleccionaste imágenes.";
+                return RedirectToAction("Index");
+            }
 
-                if (!Directory.Exists(ruta))
-                {
-                    Directory.CreateDirectory(ruta);
-                }
+            var ruta = Path.Combine(_env.WebRootPath, "uploads");
 
-                var tiposPermitidos = new[] { "image/jpeg", "image/png", "image/webp" };
+            if (!Directory.Exists(ruta))
+            {
+                Directory.CreateDirectory(ruta);
+            }
+
+            var tiposPermitidos = new[] { "image/jpeg", "image/png", "image/webp" };
+
+            foreach (var archivo in archivos)
+            {
+                if (archivo == null || archivo.Length == 0)
+                    continue;
 
                 if (!tiposPermitidos.Contains(archivo.ContentType))
-                {
-                    TempData["Error"] = "Solo se permiten imágenes.";
-                    return RedirectToAction("Index");
-                }
+                    continue;
 
                 if (archivo.Length > 10 * 1024 * 1024)
-                {
-                    TempData["Error"] = "La imagen es muy pesada (máx 10MB)";
-                    return RedirectToAction("Index");
-                }
+                    continue;
 
                 var extension = Path.GetExtension(archivo.FileName);
+
                 if (string.IsNullOrEmpty(extension))
-                {
-                    TempData["Error"] = "Archivo inválido.";
-                    return RedirectToAction("Index");
-                }
+                    continue;
+
                 var nombreUnico = Guid.NewGuid().ToString() + extension;
 
                 var filePath = Path.Combine(ruta, nombreUnico);
@@ -92,7 +94,10 @@ namespace WeddingPhotoHub.Controllers
 
                     if (ext == ".jpg" || ext == ".jpeg")
                     {
-                        await image.SaveAsync(filePath, new JpegEncoder { Quality = 75 });
+                        await image.SaveAsync(filePath, new JpegEncoder
+                        {
+                            Quality = 75
+                        });
                     }
                     else if (ext == ".png")
                     {
@@ -104,11 +109,13 @@ namespace WeddingPhotoHub.Controllers
                     }
                     else
                     {
-                        await image.SaveAsync(filePath); // fallback
+                        await image.SaveAsync(filePath);
                     }
                 }
-                TempData["Mensaje"] = "Archivo subido exitosamente.";
             }
+
+            TempData["Mensaje"] = "Fotos subidas exitosamente.";
+
             return RedirectToAction("Index");
         }
     }

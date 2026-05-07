@@ -1,20 +1,7 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\usuario\\source\\repos\\WeddingPhotoHub\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{ECED47FC-B97B-4D30-B2E8-C4A8B4169D0D}|WeddingPhotoHub\\WeddingPhotoHub.csproj|c:\\users\\usuario\\source\\repos\\weddingphotohub\\weddingphotohub\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{ECED47FC-B97B-4D30-B2E8-C4A8B4169D0D}|WeddingPhotoHub\\WeddingPhotoHub.csproj|solutionrelative:weddingphotohub\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{ECED47FC-B97B-4D30-B2E8-C4A8B4169D0D}|WeddingPhotoHub\\WeddingPhotoHub.csproj|c:\\users\\usuario\\source\\repos\\weddingphotohub\\weddingphotohub\\views\\admin\\dashboard.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{ECED47FC-B97B-4D30-B2E8-C4A8B4169D0D}|WeddingPhotoHub\\WeddingPhotoHub.csproj|solutionrelative:weddingphotohub\\views\\admin\\dashboard.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{ECED47FC-B97B-4D30-B2E8-C4A8B4169D0D}|WeddingPhotoHub\\WeddingPhotoHub.csproj|c:\\users\\usuario\\source\\repos\\weddingphotohub\\weddingphotohub\\wwwroot\\css\\admin.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
-      "RelativeMoniker": "D:0:0:{ECED47FC-B97B-4D30-B2E8-C4A8B4169D0D}|WeddingPhotoHub\\WeddingPhotoHub.csproj|solutionrelative:weddingphotohub\\wwwroot\\css\\admin.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -22,50 +9,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": -1,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Dashboard.cshtml",
-              "DocumentMoniker": "C:\\Users\\usuario\\source\\repos\\WeddingPhotoHub\\WeddingPhotoHub\\Views\\Admin\\Dashboard.cshtml",
-              "RelativeDocumentMoniker": "WeddingPhotoHub\\Views\\Admin\\Dashboard.cshtml",
-              "ToolTip": "C:\\Users\\usuario\\source\\repos\\WeddingPhotoHub\\WeddingPhotoHub\\Views\\Admin\\Dashboard.cshtml",
-              "RelativeToolTip": "WeddingPhotoHub\\Views\\Admin\\Dashboard.cshtml",
-              "ViewState": "AgIAABoAAAAAAAAAAADwvysAAAA2AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-05-06T23:55:07.647Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "AdminController.cs",
-              "DocumentMoniker": "C:\\Users\\usuario\\source\\repos\\WeddingPhotoHub\\WeddingPhotoHub\\Controllers\\AdminController.cs",
-              "RelativeDocumentMoniker": "WeddingPhotoHub\\Controllers\\AdminController.cs",
-              "ToolTip": "C:\\Users\\usuario\\source\\repos\\WeddingPhotoHub\\WeddingPhotoHub\\Controllers\\AdminController.cs",
-              "RelativeToolTip": "WeddingPhotoHub\\Controllers\\AdminController.cs",
-              "ViewState": "AgIAADsAAAAAAAAAAAAgwE0AAAAuAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-06T23:51:03.338Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "admin.css",
-              "DocumentMoniker": "C:\\Users\\usuario\\source\\repos\\WeddingPhotoHub\\WeddingPhotoHub\\wwwroot\\css\\admin.css",
-              "RelativeDocumentMoniker": "WeddingPhotoHub\\wwwroot\\css\\admin.css",
-              "ToolTip": "C:\\Users\\usuario\\source\\repos\\WeddingPhotoHub\\WeddingPhotoHub\\wwwroot\\css\\admin.css",
-              "RelativeToolTip": "WeddingPhotoHub\\wwwroot\\css\\admin.css",
-              "ViewState": "AgIAAFEAAAAAAAAAAAAuwG0AAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
-              "WhenOpened": "2026-05-06T23:49:34.688Z",
-              "EditorCaption": ""
             }
           ]
         }

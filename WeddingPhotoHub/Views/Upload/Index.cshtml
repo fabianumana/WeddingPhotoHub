@@ -32,8 +32,8 @@
 
             <form asp-action="Subir" method="post" enctype="multipart/form-data" class="text-center mt-4">
                 @Html.AntiForgeryToken()
-                <input type="file" name="archivo" class="form-control mb-3" accept="image/*" onchange="previewImage(event)" />
-                <img id="preview" style="max-width:200px; display:none; margin:auto;" class="mb-3 rounded shadow" />
+                <input type="file" name="archivos" multiple class="form-control mb-3" accept="image/*" onchange="previewImage(event)" />
+                <div id="previewContainer" class="d-flex flex-wrap justify-content-center gap-2 mb-3"></div>
                 <button type="submit" class="btn btn-primary btn-lg px-5">Subir Foto</button>
             </form>
 
@@ -130,39 +130,29 @@
     overlay.tabIndex = 0;
   })();
 
-          function previewImage(event) {
-        const img = document.getElementById('preview');
-        const file = event.target.files[0];
+      function previewImage(event) {
 
-        if (file) {
+        const container = document.getElementById('previewContainer');
+
+        container.innerHTML = '';
+
+        const files = event.target.files;
+
+        for (let i = 0; i < files.length; i++) {
+
+            const file = files[i];
+
+            const img = document.createElement('img');
+
             img.src = URL.createObjectURL(file);
-            img.style.display = 'block';
+
+            img.style.width = '120px';
+            img.style.height = '120px';
+            img.style.objectFit = 'cover';
+            img.style.borderRadius = '10px';
+            img.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+
+            container.appendChild(img);
         }
-    }
-
-           function openImage(src) {
-        const modal = document.createElement('div');
-
-        modal.style = `
-            position:fixed;
-            top:0;
-            left:0;
-            width:100%;
-            height:100%;
-            background:rgba(0,0,0,0.9);
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            z-index:9999;
-            cursor:zoom-out;
-        `;
-
-        modal.innerHTML = `
-            <img src="${src}" style="max-width:90%; max-height:90%; border-radius:12px;">
-        `;
-
-        modal.onclick = () => modal.remove();
-
-        document.body.appendChild(modal);
     }
 </script>
