@@ -54,7 +54,10 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-    if(!context.Users.Any())
+    // 🔥 crea automáticamente la base de datos y tablas
+    context.Database.Migrate();
+
+    if (!context.Users.Any())
     {
         context.Users.Add(new User
         {
@@ -72,6 +75,5 @@ using (var scope = app.Services.CreateScope())
 
         context.SaveChanges();
     }
-    
 }
 app.Run();
