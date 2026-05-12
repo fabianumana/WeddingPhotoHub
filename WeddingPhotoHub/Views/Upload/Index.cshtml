@@ -1,4 +1,4 @@
-﻿@model List<string>
+﻿@model List<WeddingPhotoHub.Models.Foto>
 @*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
@@ -17,6 +17,7 @@
 <div id="mainContent" aria-hidden="true">
     <div class="container mt-5">
         <div class="card shadow p-4">
+
             <h2 class="text-center mt-4">💍 Nuestra Boda</h2>
             <p class="text-center">Comparte tus recuerdos con nosotros 📸</p>
 
@@ -32,167 +33,158 @@
 
             <form asp-action="Subir" method="post" enctype="multipart/form-data" class="text-center mt-4">
                 @Html.AntiForgeryToken()
-                <input type="file" name="archivos" multiple class="form-control mb-3" accept="image/*" onchange="previewImage(event)" />
-                <div id="previewContainer" class="d-flex flex-wrap justify-content-center gap-2 mb-3"></div>
-                <button type="submit" class="btn btn-primary btn-lg px-5">Subir Foto</button>
+
+                <input type="file"
+                       name="archivos"
+                       multiple
+                       class="form-control mb-3"
+                       accept="image/*"
+                       onchange="previewImages(event)" />
+
+                <div id="previewContainer"
+                     class="d-flex flex-wrap justify-content-center gap-2 mb-3"></div>
+
+                <button type="submit" class="btn btn-primary btn-lg px-5">
+                    Subir Foto
+                </button>
             </form>
 
             <h3 class="mt-5 text-center">📸 Galería</h3>
 
             <div class="gallery-grid mt-4">
-                @if (Model != null && Model.Any())
+                @if (Model?.Any() == true)
                 {
                     foreach (var foto in Model)
                     {
                         <div class="gallery-item">
-                            
-                            <img src="@foto" class="img-fluid rounded-top preview-img" loading="lazy" />
-                            
+                            <img src="@foto.Url"
+                                 class="img-fluid rounded-top preview-img"
+                                 loading="lazy"
+                                 onclick="openModal(this.src)" />
                         </div>
                     }
                 }
                 else
                 {
-                    <div class="col-12 text-center">
-                        <p>Aún no hay fotos... ¡sé el primero en subir una! 📸</p>
+                    <div class="text-center">
+                        <p>Aún no hay fotos... ¡sé el primero! 📸</p>
                     </div>
                 }
             </div>
+
         </div>
+
         <a href="/Auth/Login" class="admin-hidden-link">⚙️</a>
     </div>
 </div>
 
 <script>
-  (function () {
-    const overlay = document.getElementById('envelopeOverlay');
-    const envelope = document.getElementById('pageEnvelope');
-    const main = document.getElementById('mainContent');
+    /* =========================
+       OVERLAY (ENVELOPE)
+    ========================= */
+    (() => {
+        const overlay = document.getElementById('envelopeOverlay');
+        const envelope = document.getElementById('pageEnvelope');
+        const main = document.getElementById('mainContent');
 
-    // Debug: ensure elements exist
-    // console.log('envelope init', { overlay, envelope, main });
+        if (!overlay || !envelope || !main) return;
 
-    if (!overlay || !envelope || !main) return;
+        overlay.style.zIndex = '9999';
 
-    // Force overlay above other elements in case of z-index conflicts
-    overlay.style.zIndex = overlay.style.zIndex || '9999';
+        const FALLBACK_MS = 1400;
+        let opened = false;
 
-    // Asegura que el contenido principal esté oculto hasta la interacción
-    main.classList.remove('visible');
-    main.setAttribute('aria-hidden', 'true');
+        const openPage = () => {
+            if (opened) return;
+            opened = true;
 
-    const FALLBACK_MS = 1400;
-    let opening = false;
+            envelope.classList.add('open');
 
-    function revealPage() {
-      if (opening) return;
-      opening = true;
+            const finish = () => {
+                overlay.classList.add('fade-out');
+                overlay.style.pointerEvents = 'none';
 
-      // trigger CSS animation
-      envelope.classList.add('open');
+                setTimeout(() => overlay.remove(), 300);
 
-          function finish() {
-        if (!overlay) return;
+                main.classList.add('visible');
+                main.setAttribute('aria-hidden', 'false');
+            };
 
-        overlay.classList.add('fade-out');
+            envelope.addEventListener('animationend', finish, { once: true });
+            setTimeout(finish, FALLBACK_MS);
+        };
 
-        // 🔥 CLAVE: desactivar interacción inmediatamente
-        overlay.style.pointerEvents = 'none';
+        overlay.addEventListener('click', openPage);
+        envelope.addEventListener('click', e => {
+            e.stopPropagation();
+            openPage();
+        });
 
-        // 🔥 MÁS SEGURO: quitarlo DEL TODO sin esperar
-        setTimeout(() => {
-            if (overlay.parentNode) {
-                overlay.remove(); // más limpio
+        overlay.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openPage();
             }
-        }, 300);
+        });
 
-        main.classList.add('visible');
-        main.setAttribute('aria-hidden', 'false');
-    }
+        overlay.tabIndex = 0;
+    })();
 
-      // listen for animation end on the flap; also use fallback
-      envelope.addEventListener('animationend', function ae() { finish(); envelope.removeEventListener('animationend', ae); });
-      setTimeout(finish, FALLBACK_MS);
-    }
-
-    // click en overlay y en la propia carta
-    overlay.addEventListener('click', function (e) { e.preventDefault(); revealPage(); });
-    envelope.addEventListener('click', function (e) { e.stopPropagation(); revealPage(); });
-
-    // keyboard
-    overlay.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        revealPage();
-      }
-    });
-
-    overlay.tabIndex = 0;
-  })();
-
-      function previewImage(event) {
-
+    /* =========================
+       PREVIEW IMAGES
+    ========================= */
+    function previewImages(event) {
         const container = document.getElementById('previewContainer');
-
         container.innerHTML = '';
 
         const files = event.target.files;
 
-        for (let i = 0; i < files.length; i++) {
-
-            const file = files[i];
-
+        for (const file of files) {
             const img = document.createElement('img');
-
             img.src = URL.createObjectURL(file);
 
-            img.style.width = '120px';
-            img.style.height = '120px';
-            img.style.objectFit = 'cover';
-            img.style.borderRadius = '10px';
-            img.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+            Object.assign(img.style, {
+                width: '120px',
+                height: '120px',
+                objectFit: 'cover',
+                borderRadius: '10px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+            });
 
             container.appendChild(img);
         }
     }
 
-        document.addEventListener("DOMContentLoaded", function () {
+    /* =========================
+       MODAL (UNA SOLA FUNCIÓN)
+    ========================= */
+    function openModal(src) {
+        const modal = document.createElement('div');
 
-        const imagenes = document.querySelectorAll(".preview-img");
-
-        imagenes.forEach(img => {
-
-            img.addEventListener("click", function () {
-
-                const modal = document.createElement("div");
-
-                modal.style.position = "fixed";
-                modal.style.top = "0";
-                modal.style.left = "0";
-                modal.style.width = "100%";
-                modal.style.height = "100%";
-                modal.style.background = "rgba(0,0,0,0.9)";
-                modal.style.display = "flex";
-                modal.style.alignItems = "center";
-                modal.style.justifyContent = "center";
-                modal.style.zIndex = "99999";
-                modal.style.cursor = "zoom-out";
-
-                const imagen = document.createElement("img");
-
-                imagen.src = this.src;
-                imagen.style.maxWidth = "90%";
-                imagen.style.maxHeight = "90%";
-                imagen.style.borderRadius = "12px";
-
-                modal.appendChild(imagen);
-
-                modal.addEventListener("click", () => {
-                    modal.remove();
-                });
-
-                document.body.appendChild(modal);
-            });
+        Object.assign(modal.style, {
+            position: 'fixed',
+            inset: '0',
+            background: 'rgba(0,0,0,0.9)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: '99999',
+            cursor: 'zoom-out'
         });
-    });
+
+        const img = document.createElement('img');
+        img.src = src;
+
+        Object.assign(img.style, {
+            maxWidth: '90%',
+            maxHeight: '90%',
+            borderRadius: '12px'
+        });
+
+        modal.appendChild(img);
+
+        modal.addEventListener('click', () => modal.remove());
+
+        document.body.appendChild(modal);
+    }
 </script>

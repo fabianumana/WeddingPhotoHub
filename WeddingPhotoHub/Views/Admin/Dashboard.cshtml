@@ -1,4 +1,4 @@
-﻿@model List<string>
+﻿@model List<WeddingPhotoHub.Models.Foto>
 
 <link rel="stylesheet" href="~/css/admin.css" />
 
@@ -21,88 +21,73 @@
     }
 
     <div class="gallery">
-        @if (!Model.Any())
-        {
-            <p>No hay fotos aún 📷</p>
-        }
         @foreach (var foto in Model)
         {
-            var nombreArchivo = System.IO.Path.GetFileName(foto);
-
             <div class="card">
-                <img src="@foto" class="img-card preview-img" loading="lazy" onclick="openImage('@foto')" />
+
+                <img src="@foto.Url"
+                     class="img-card preview-img"
+                     onclick="openImage('@foto.Url')" />
 
                 <div class="actions">
+
                     <form method="post" action="/Admin/Descargar">
                         @Html.AntiForgeryToken()
-                        <input type="hidden" name="nombreArchivo" value="@nombreArchivo" />
-                        <button type="submit" class="btn download">
-                            ⬇ Descargar
-                        </button>
+                        <input type="hidden" name="id" value="@foto.Id" />
+                        <button type="submit">⬇ Descargar</button>
                     </form>
 
-                    <form method="post" action="/Admin/Eliminar"
-                          onsubmit="return confirm('¿Eliminar esta foto?');">
+                    <form method="post" action="/Admin/Eliminar">
                         @Html.AntiForgeryToken()
-                        <input type="hidden" name="nombreArchivo" value="@nombreArchivo" />
-                        <button type="submit" class="btn delete">
-                            🗑 Eliminar
-                        </button>
+                        <input type="hidden" name="id" value="@foto.Id" />
+                        <button type="submit">🗑 Eliminar</button>
                     </form>
+
                 </div>
+
             </div>
         }
     </div>
 
 </div>
+
 <script>
-    document.querySelectorAll('.preview-img').forEach(img => {
-        img.addEventListener('click', () => {
-            const modal = document.createElement('div');
-            modal.style = `
-                position:fixed;
-                top:0; left:0;
-                width:100%; height:100%;
-                background:rgba(0,0,0,0.85);
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                z-index:9999;
-                cursor:zoom-out;
-            `;
-
-            modal.innerHTML = `
-                <img src="${img.src}" style="max-width:90%; max-height:90%; border-radius:12px;">
-            `;
-
-            modal.onclick = () => modal.remove();
-
-            document.body.appendChild(modal);
-        });
-    });
+    /* =========================
+       MODAL (OPTIMIZADO - SIN DUPLICADOS)
+    ========================= */
 
     function openImage(src) {
+
+        // evita múltiples modales abiertos
+        const existing = document.getElementById('img-modal');
+        if (existing) existing.remove();
+
         const modal = document.createElement('div');
+        modal.id = 'img-modal';
 
-        modal.style = `
-            position:fixed;
-            top:0;
-            left:0;
-            width:100%;
-            height:100%;
-            background:rgba(0,0,0,0.9);
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            z-index:9999;
-            cursor:zoom-out;
-        `;
+        Object.assign(modal.style, {
+            position: 'fixed',
+            inset: '0',
+            background: 'rgba(0,0,0,0.85)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: '9999',
+            cursor: 'zoom-out'
+        });
 
-        modal.innerHTML = `
-            <img src="${src}" style="max-width:90%; max-height:90%; border-radius:12px;">
-        `;
+        const img = document.createElement('img');
+        img.src = src;
 
-        modal.onclick = () => modal.remove();
+        Object.assign(img.style, {
+            maxWidth: '90%',
+            maxHeight: '90%',
+            borderRadius: '12px'
+        });
+
+        modal.appendChild(img);
+
+        modal.addEventListener('click', () => modal.remove());
 
         document.body.appendChild(modal);
     }

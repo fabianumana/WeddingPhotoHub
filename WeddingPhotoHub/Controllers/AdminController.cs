@@ -8,72 +8,59 @@ namespace WeddingPhotoHub.Controllers
     public class AdminController : Controller
     {
         private readonly AppDbContext _context;
-        private readonly IWebHostEnvironment _env;
+        private readonly CloudinaryService _cloudinaryService;
 
-        public AdminController(AppDbContext context, IWebHostEnvironment env)
+        public AdminController(AppDbContext context, CloudinaryService cloudinaryService)
         {
             _context = context;
-            _env = env;
+            _cloudinaryService = cloudinaryService;
         }
+
         public IActionResult Dashboard()
         {
-            var ruta = Path.Combine(_env.WebRootPath, "uploads");
-
-            var fotos = new List<string>();
-
-            if (Directory.Exists(ruta))
-            {
-                var archivos = Directory.GetFiles(ruta)
-                .OrderByDescending(f => System.IO.File.GetCreationTime(f));
-
-                foreach (var archivo in archivos)
-                {
-                    var nombreArchivo = Path.GetFileName(archivo);
-                    fotos.Add("/uploads/" + nombreArchivo);
-                }
-            }
+            var fotos = _context.Fotos
+                .OrderByDescending(x => x.FechaSubida)
+                .ToList();
 
             return View(fotos);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Descargar(string nombreArchivo)
+        public IActionResult Descargar(int id)
         {
-            if (string.IsNullOrEmpty(nombreArchivo))
+            var foto = _context.Fotos.FirstOrDefault(x => x.Id == id);
+
+            if (foto == null || string.IsNullOrWhiteSpace(foto.Url))
+            {
+                TempData["Error"] = "Imagen inválida.";
                 return RedirectToAction("Dashboard");
+            }
 
-            var nombreSeguro = Path.GetFileName(nombreArchivo);
-            var ruta = Path.Combine(_env.WebRootPath, "uploads", nombreSeguro);
-
-            if (!System.IO.File.Exists(ruta))
-                return NotFound();
-
-            var bytes = System.IO.File.ReadAllBytes(ruta);
-
-            return File(bytes, "application/octet-stream", nombreSeguro);
+            return Redirect(foto.Url + "?fl_attachment=true");
         }
 
-        [Authorize(Roles = "Admin")]
-        [ValidateAntiForgeryToken]
         [HttpPost]
-        public IActionResult Eliminar(string nombreArchivo)
+        [ValidateAntiForgeryToken]
+        public IActionResult Eliminar(int id)
         {
-            var nombreSeguro = Path.GetFileName(nombreArchivo);
-            var ruta = Path.Combine(_env.WebRootPath, "uploads", nombreSeguro);
+            var foto = _context.Fotos.FirstOrDefault(x => x.Id == id);
 
-            if (string.IsNullOrEmpty(nombreArchivo))
+            if (foto == null)
+            {
+                TempData["Error"] = "Imagen no encontrada.";
                 return RedirectToAction("Dashboard");
+            }
 
-            if (System.IO.File.Exists(ruta))
+            if (!string.IsNullOrWhiteSpace(foto.PublicId))
             {
-                System.IO.File.Delete(ruta);
-                TempData["Mensaje"] = "Archivo eliminado exitosamente.";
+                _cloudinaryService.DeleteImage(foto.PublicId);
             }
-            else
-            {
-                TempData["Error"] = "Archivo no encontrado.";
-            }
+
+            _context.Fotos.Remove(foto);
+            _context.SaveChanges();
+
+            TempData["Mensaje"] = "Imagen eliminada correctamente.";
 
             return RedirectToAction("Dashboard");
         }

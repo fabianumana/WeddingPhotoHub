@@ -1,50 +1,36 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Jpeg;
-using SixLabors.ImageSharp.Formats.Png;
-using SixLabors.ImageSharp.Formats.Webp;
-using SixLabors.ImageSharp.Processing;
 using System.IO;
 using WeddingPhotoHub.Data;
+using WeddingPhotoHub.Models;
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 
 namespace WeddingPhotoHub.Controllers
 {
     public class UploadController : Controller
     {
         private readonly AppDbContext _context;
-        private readonly IWebHostEnvironment _env;
+        private readonly CloudinaryService _cloudinaryService;
 
-        public UploadController(AppDbContext context, IWebHostEnvironment env)
+        public UploadController(AppDbContext context, CloudinaryService cloudinaryService)
         {
             _context = context;
-            _env = env;
+            _cloudinaryService = cloudinaryService;
         }
 
         public IActionResult Index()
         {
-            var ruta = Path.Combine(_env.WebRootPath, "uploads");
-
-            var fotos = new List<string>();
-
-            if (Directory.Exists(ruta))
-            {
-                var archivos = Directory.GetFiles(ruta)
-                .OrderByDescending(f => System.IO.File.GetCreationTime(f));
-
-                foreach (var archivo in archivos)
-                {
-                    var nombreArchivo = Path.GetFileName(archivo);
-                    fotos.Add("/uploads/" + nombreArchivo);
-                }
-            }
+            var fotos = _context.Fotos
+            .OrderByDescending(x => x.FechaSubida)
+            .ToList();
 
             return View(fotos);
         }
 
-        [ValidateAntiForgeryToken]
         [HttpPost]
-        [RequestSizeLimit(52428800)] // 50MB total
+        [ValidateAntiForgeryToken]
+        [RequestSizeLimit(52428800)]
         public async Task<IActionResult> Subir(List<IFormFile> archivos)
         {
             if (archivos == null || !archivos.Any())
@@ -53,68 +39,60 @@ namespace WeddingPhotoHub.Controllers
                 return RedirectToAction("Index");
             }
 
-            var ruta = Path.Combine(_env.WebRootPath, "uploads");
+            var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
 
-            if (!Directory.Exists(ruta))
-            {
-                Directory.CreateDirectory(ruta);
-            }
-
-            var tiposPermitidos = new[] { "image/jpeg", "image/png", "image/webp" };
+            var errores = new List<string>();
+            var exitos = 0;
 
             foreach (var archivo in archivos)
             {
                 if (archivo == null || archivo.Length == 0)
                     continue;
 
-                if (!tiposPermitidos.Contains(archivo.ContentType))
+                var extension = Path.GetExtension(archivo.FileName).ToLower();
+
+                if (!allowedTypes.Contains(archivo.ContentType) ||
+                    !allowedExtensions.Contains(extension))
+                {
+                    errores.Add($"{archivo.FileName} no es válido");
                     continue;
+                }
 
                 if (archivo.Length > 10 * 1024 * 1024)
-                    continue;
-
-                var extension = Path.GetExtension(archivo.FileName);
-
-                if (string.IsNullOrEmpty(extension))
-                    continue;
-
-                var nombreUnico = Guid.NewGuid().ToString() + extension;
-
-                var filePath = Path.Combine(ruta, nombreUnico);
-
-                using (var image = await Image.LoadAsync(archivo.OpenReadStream()))
                 {
-                    image.Mutate(x => x.Resize(new ResizeOptions
-                    {
-                        Mode = ResizeMode.Max,
-                        Size = new Size(1920, 1080)
-                    }));
-
-                    var ext = extension.ToLower();
-
-                    if (ext == ".jpg" || ext == ".jpeg")
-                    {
-                        await image.SaveAsync(filePath, new JpegEncoder
-                        {
-                            Quality = 75
-                        });
-                    }
-                    else if (ext == ".png")
-                    {
-                        await image.SaveAsync(filePath, new PngEncoder());
-                    }
-                    else if (ext == ".webp")
-                    {
-                        await image.SaveAsync(filePath, new WebpEncoder());
-                    }
-                    else
-                    {
-                        await image.SaveAsync(filePath);
-                    }
+                    errores.Add($"{archivo.FileName} supera 10MB");
+                    continue;
                 }
+
+                var result = await _cloudinaryService.UploadImageAsync(archivo);
+
+                if (string.IsNullOrWhiteSpace(result.Url) ||
+                    string.IsNullOrWhiteSpace(result.PublicId))
+                {
+                    errores.Add($"{archivo.FileName} falló en Cloudinary");
+                    continue;
+                }
+
+                _context.Fotos.Add(new Foto
+                {
+                    Url = result.Url,
+                    PublicId = result.PublicId,
+                    FechaSubida = DateTime.UtcNow,
+                    Tamaño = archivo.Length,
+                    NombreArchivo = archivo.FileName
+                });
+
+                exitos++;
             }
 
-            TempData["Mensaje"] = "Fotos subidas exitosamente.";
+            await _context.SaveChangesAsync();
+
+            if (exitos > 0)
+                TempData["Mensaje"] = $"{exitos} fotos subidas correctamente.";
+
+            if (errores.Any())
+                TempData["Error"] = string.Join(" | ", errores);
 
             return RedirectToAction("Index");
         }
