@@ -31,7 +31,7 @@
 
                 <div class="actions">
 
-                    <form method="post" action="/Admin/Descargar">
+                    <form method="post" action="/Admin/Descargar" target="_blank">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="id" value="@foto.Id" />
                         <button type="submit">⬇ Descargar</button>

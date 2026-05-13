@@ -33,7 +33,7 @@ namespace WeddingPhotoHub.Controllers
 
             if (foto == null || string.IsNullOrWhiteSpace(foto.Url))
             {
-                TempData["Error"] = "Imagen inválida.";
+                TempData["Error"] = "Imagen no encontrada.";
                 return RedirectToAction("Dashboard");
             }
 
