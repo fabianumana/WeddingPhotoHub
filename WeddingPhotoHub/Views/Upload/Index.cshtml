@@ -34,19 +34,38 @@
             <form asp-action="Subir" method="post" enctype="multipart/form-data" class="text-center mt-4">
                 @Html.AntiForgeryToken()
 
-                <input type="file"
-                       name="archivos"
-                       multiple
-                       capture="environment"
-                       class="form-control mb-3"
-                       accept="image/*,video/*"
-                       onchange="previewImages(event)" />
+                <div class="d-flex flex-column gap-3 mb-3">
+
+                    <!-- 📸 TOMAR FOTO O VIDEO -->
+                    <label class="btn btn-success btn-lg">
+                        📸 Tomar Foto o Video
+                        <input type="file"
+                               name="archivos"
+                               multiple
+                               capture="environment"
+                               accept="image/*,video/*"
+                               onchange="previewImages(event)"
+                               hidden>
+                    </label>
+
+                    <!-- 🖼 ELEGIR DESDE GALERÍA -->
+                    <label class="btn btn-primary btn-lg">
+                        🖼 Elegir desde Galería
+                        <input type="file"
+                               name="archivos"
+                               multiple
+                               accept="image/*,video/*"
+                               onchange="previewImages(event)"
+                               hidden>
+                    </label>
+
+                </div>
 
                 <div id="previewContainer"
                      class="d-flex flex-wrap justify-content-center gap-2 mb-3"></div>
 
                 <button type="submit" class="btn btn-primary btn-lg px-5">
-                    Subir Foto
+                    Compartir Recuerdos
                 </button>
             </form>
 
@@ -149,19 +168,21 @@
     /* =========================
        PREVIEW IMAGES
     ========================= */
-        function previewImages(event) {
+    let selectedFiles = [];
+
+    function previewImages(event) {
 
         const container = document.getElementById('previewContainer');
 
-        container.innerHTML = '';
+        const files = Array.from(event.target.files);
 
-        const files = event.target.files;
+        files.forEach(file => {
 
-        for (const file of files) {
+            selectedFiles.push(file);
 
             const fileURL = URL.createObjectURL(file);
 
-                if (file.type.startsWith('image')) {
+            if (file.type.startsWith('image')) {
 
                 const img = document.createElement('img');
 
@@ -197,7 +218,8 @@
 
                 container.appendChild(video);
             }
-        }
+
+        });
     }
 
     /* =========================

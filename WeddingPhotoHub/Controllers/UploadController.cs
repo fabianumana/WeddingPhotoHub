@@ -71,7 +71,7 @@ namespace WeddingPhotoHub.Controllers
                         continue;
                     }
 
-                    if (archivo.Length > 50 * 1024 * 1024)
+                    if (archivo.Length > 30 * 1024 * 1024)
                     {
                         errores.Add($"{archivo.FileName} supera 50MB");
                         continue;
