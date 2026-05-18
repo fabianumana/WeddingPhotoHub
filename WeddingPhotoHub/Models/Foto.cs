@@ -11,5 +11,6 @@
         public DateTime FechaSubida { get; set; } = DateTime.UtcNow;
         public long Tamaño { get; set; }
         public string? ContentType { get; set; }
+        public bool EsVideo { get; set; }
     }
 }

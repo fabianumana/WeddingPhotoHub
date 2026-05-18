@@ -19,25 +19,48 @@ namespace WeddingPhotoHub.Data
         }
 
         // 🔥 UPLOAD
-        public async Task<(string? Url, string? PublicId)> UploadImageAsync(IFormFile file)
+        public async Task<(string? Url, string? PublicId)> UploadMediaAsync(IFormFile file)
         {
             if (file == null || file.Length == 0)
                 return (null, null);
 
             await using var stream = file.OpenReadStream();
 
-            var uploadParams = new ImageUploadParams
+            var extension = Path.GetExtension(file.FileName).ToLower();
+
+            bool esVideo =
+                extension == ".mp4" ||
+                extension == ".mov" ||
+                extension == ".webm";
+
+            RawUploadResult result;
+
+            if (esVideo)
             {
-                File = new FileDescription(Guid.NewGuid().ToString(), stream),
-                Folder = "weddingphotohub",
-                Transformation = new Transformation()
-                    .Quality(80)
-                    .FetchFormat("auto")
-            };
+                var uploadParams = new VideoUploadParams
+                {
+                    File = new FileDescription(Guid.NewGuid().ToString(), stream),
+                    Folder = "weddingphotohub/videos"
+                };
 
-            var result = await _cloudinary.UploadAsync(uploadParams);
+                result = await _cloudinary.UploadAsync(uploadParams);
+            }
+            else
+            {
+                var uploadParams = new ImageUploadParams
+                {
+                    File = new FileDescription(Guid.NewGuid().ToString(), stream),
+                    Folder = "weddingphotohub/images",
+                    Transformation = new Transformation()
+                        .Quality(80)
+                        .FetchFormat("auto")
+                };
 
-            if (result?.SecureUrl == null || string.IsNullOrWhiteSpace(result.PublicId))
+                result = await _cloudinary.UploadAsync(uploadParams);
+            }
+
+            if (result?.SecureUrl == null ||
+                string.IsNullOrWhiteSpace(result.PublicId))
             {
                 return (null, null);
             }
@@ -48,19 +71,37 @@ namespace WeddingPhotoHub.Data
             );
         }
 
-        // 🗑 DELETE
-        public void DeleteImage(string publicId)
+        // 🗑 DELETE MEDIA
+        public void DeleteMedia(string publicId, string? contentType)
         {
             if (string.IsNullOrWhiteSpace(publicId))
                 return;
 
-            var deletionParams = new DeletionParams(publicId);
+            DeletionParams deletionParams;
+
+            // 🔥 SI ES VIDEO
+            if (!string.IsNullOrWhiteSpace(contentType) &&
+                contentType.StartsWith("video"))
+            {
+                deletionParams = new DeletionParams(publicId)
+                {
+                    ResourceType = ResourceType.Video
+                };
+            }
+            else
+            {
+                // 🔥 SI ES IMAGEN
+                deletionParams = new DeletionParams(publicId)
+                {
+                    ResourceType = ResourceType.Image
+                };
+            }
+
             var result = _cloudinary.Destroy(deletionParams);
 
             if (result.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                // opcional: log aquí
-                Console.WriteLine("Error eliminando imagen en Cloudinary");
+                Console.WriteLine("Error eliminando archivo en Cloudinary");
             }
         }
     }

@@ -35,12 +35,23 @@ namespace WeddingPhotoHub.Controllers
         {
             if (archivos == null || !archivos.Any())
             {
-                TempData["Error"] = "No seleccionaste imágenes.";
+                TempData["Error"] = "No seleccionaste archivos.";
                 return RedirectToAction("Index");
             }
 
-            var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+            var allowedImageTypes = new[]
+            {
+        "image/jpeg",
+        "image/png",
+        "image/webp"
+    };
+
+            var allowedVideoTypes = new[]
+            {
+        "video/mp4",
+        "video/quicktime",
+        "video/webm"
+    };
 
             var errores = new List<string>();
             var exitos = 0;
@@ -50,22 +61,38 @@ namespace WeddingPhotoHub.Controllers
                 if (archivo == null || archivo.Length == 0)
                     continue;
 
-                var extension = Path.GetExtension(archivo.FileName).ToLower();
+                bool esVideo = archivo.ContentType.StartsWith("video/");
 
-                if (!allowedTypes.Contains(archivo.ContentType) ||
-                    !allowedExtensions.Contains(extension))
+                if (esVideo)
                 {
-                    errores.Add($"{archivo.FileName} no es válido");
-                    continue;
+                    if (!allowedVideoTypes.Contains(archivo.ContentType))
+                    {
+                        errores.Add($"{archivo.FileName} no es un video válido");
+                        continue;
+                    }
+
+                    if (archivo.Length > 50 * 1024 * 1024)
+                    {
+                        errores.Add($"{archivo.FileName} supera 50MB");
+                        continue;
+                    }
+                }
+                else
+                {
+                    if (!allowedImageTypes.Contains(archivo.ContentType))
+                    {
+                        errores.Add($"{archivo.FileName} no es una imagen válida");
+                        continue;
+                    }
+
+                    if (archivo.Length > 10 * 1024 * 1024)
+                    {
+                        errores.Add($"{archivo.FileName} supera 10MB");
+                        continue;
+                    }
                 }
 
-                if (archivo.Length > 10 * 1024 * 1024)
-                {
-                    errores.Add($"{archivo.FileName} supera 10MB");
-                    continue;
-                }
-
-                var result = await _cloudinaryService.UploadImageAsync(archivo);
+                var result = await _cloudinaryService.UploadMediaAsync(archivo);
 
                 if (string.IsNullOrWhiteSpace(result.Url) ||
                     string.IsNullOrWhiteSpace(result.PublicId))
@@ -80,7 +107,9 @@ namespace WeddingPhotoHub.Controllers
                     PublicId = result.PublicId,
                     FechaSubida = DateTime.UtcNow,
                     Tamaño = archivo.Length,
-                    NombreArchivo = archivo.FileName
+                    NombreArchivo = archivo.FileName,
+                    ContentType = archivo.ContentType,
+                    EsVideo = esVideo
                 });
 
                 exitos++;
@@ -89,7 +118,7 @@ namespace WeddingPhotoHub.Controllers
             await _context.SaveChangesAsync();
 
             if (exitos > 0)
-                TempData["Mensaje"] = $"{exitos} fotos subidas correctamente.";
+                TempData["Mensaje"] = $"{exitos} archivos subidos correctamente.";
 
             if (errores.Any())
                 TempData["Error"] = string.Join(" | ", errores);

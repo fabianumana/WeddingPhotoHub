@@ -25,9 +25,22 @@
         {
             <div class="card">
 
-                <img src="@foto.Url"
-                     class="img-card preview-img"
-                     onclick="openImage('@foto.Url')" />
+                @if (foto.ContentType != null && foto.ContentType.StartsWith("video"))
+                {
+                    <video controls
+                           class="img-card"
+                           onclick="openModal('@foto.Url', 'video')">
+
+                        <source src="@foto.Url" type="@foto.ContentType" />
+
+                    </video>
+                }
+                else
+                {
+                    <img src="@foto.Url"
+                         class="img-card preview-img"
+                         onclick="openModal('@foto.Url', 'image')" />
+                }
 
                 <div class="actions">
 
@@ -52,43 +65,64 @@
 </div>
 
 <script>
-    /* =========================
-       MODAL (OPTIMIZADO - SIN DUPLICADOS)
-    ========================= */
 
-    function openImage(src) {
+    function openModal(src, type = 'image') {
 
-        // evita múltiples modales abiertos
-        const existing = document.getElementById('img-modal');
-        if (existing) existing.remove();
+        const existing = document.getElementById('media-modal');
+
+        if (existing) {
+            existing.remove();
+        }
 
         const modal = document.createElement('div');
-        modal.id = 'img-modal';
+
+        modal.id = 'media-modal';
 
         Object.assign(modal.style, {
             position: 'fixed',
             inset: '0',
-            background: 'rgba(0,0,0,0.85)',
+            background: 'rgba(0,0,0,0.9)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            zIndex: '9999',
+            zIndex: '99999',
             cursor: 'zoom-out'
         });
 
-        const img = document.createElement('img');
-        img.src = src;
+        if (type === 'video') {
 
-        Object.assign(img.style, {
-            maxWidth: '90%',
-            maxHeight: '90%',
-            borderRadius: '12px'
-        });
+            const video = document.createElement('video');
 
-        modal.appendChild(img);
+            video.src = src;
+            video.controls = true;
+            video.autoplay = true;
+
+            Object.assign(video.style, {
+                maxWidth: '90%',
+                maxHeight: '90%',
+                borderRadius: '12px'
+            });
+
+            modal.appendChild(video);
+        }
+        else {
+
+            const img = document.createElement('img');
+
+            img.src = src;
+
+            Object.assign(img.style, {
+                maxWidth: '90%',
+                maxHeight: '90%',
+                borderRadius: '12px'
+            });
+
+            modal.appendChild(img);
+        }
 
         modal.addEventListener('click', () => modal.remove());
 
         document.body.appendChild(modal);
     }
+
 </script>

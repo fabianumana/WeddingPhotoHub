@@ -54,7 +54,10 @@ namespace WeddingPhotoHub.Controllers
 
             if (!string.IsNullOrWhiteSpace(foto.PublicId))
             {
-                _cloudinaryService.DeleteImage(foto.PublicId);
+                _cloudinaryService.DeleteMedia(
+                    foto.PublicId,
+                    foto.ContentType
+                );
             }
 
             _context.Fotos.Remove(foto);

@@ -37,8 +37,9 @@
                 <input type="file"
                        name="archivos"
                        multiple
+                       capture="environment"
                        class="form-control mb-3"
-                       accept="image/*"
+                       accept="image/*,video/*"
                        onchange="previewImages(event)" />
 
                 <div id="previewContainer"
@@ -52,15 +53,29 @@
             <h3 class="mt-5 text-center">📸 Galería</h3>
 
             <div class="gallery-grid mt-4">
+
                 @if (Model?.Any() == true)
                 {
                     foreach (var foto in Model)
                     {
                         <div class="gallery-item">
-                            <img src="@foto.Url"
-                                 class="img-fluid rounded-top preview-img"
-                                 loading="lazy"
-                                 onclick="openModal(this.src)" />
+
+                            @if (foto.ContentType != null && foto.ContentType.StartsWith("video"))
+                            {
+                                <video controls
+                                       class="img-fluid rounded-top preview-video"
+                                       preload="metadata">
+                                    <source src="@foto.Url" type="@foto.ContentType" />
+                                </video>
+                            }
+                            else
+                            {
+                                <img src="@foto.Url"
+                                     class="img-fluid rounded-top preview-img"
+                                     loading="lazy"
+                                     onclick="openModal('@foto.Url', 'image')" />
+                            }
+
                         </div>
                     }
                 }
@@ -70,6 +85,7 @@
                         <p>Aún no hay fotos... ¡sé el primero! 📸</p>
                     </div>
                 }
+
             </div>
 
         </div>
@@ -133,32 +149,62 @@
     /* =========================
        PREVIEW IMAGES
     ========================= */
-    function previewImages(event) {
+        function previewImages(event) {
+
         const container = document.getElementById('previewContainer');
+
         container.innerHTML = '';
 
         const files = event.target.files;
 
         for (const file of files) {
-            const img = document.createElement('img');
-            img.src = URL.createObjectURL(file);
 
-            Object.assign(img.style, {
-                width: '120px',
-                height: '120px',
-                objectFit: 'cover',
-                borderRadius: '10px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
-            });
+            const fileURL = URL.createObjectURL(file);
 
-            container.appendChild(img);
+                if (file.type.startsWith('image')) {
+
+                const img = document.createElement('img');
+
+                img.src = fileURL;
+
+                Object.assign(img.style, {
+                    width: '120px',
+                    height: '120px',
+                    objectFit: 'cover',
+                    borderRadius: '10px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+                });
+
+                container.appendChild(img);
+            }
+
+            else if (file.type.startsWith('video')) {
+
+                const video = document.createElement('video');
+
+                video.src = fileURL;
+
+                video.controls = true;
+                video.muted = true;
+
+                Object.assign(video.style, {
+                    width: '120px',
+                    height: '120px',
+                    objectFit: 'cover',
+                    borderRadius: '10px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+                });
+
+                container.appendChild(video);
+            }
         }
     }
 
     /* =========================
        MODAL (UNA SOLA FUNCIÓN)
     ========================= */
-    function openModal(src) {
+        function openModal(src, type = 'image') {
+
         const modal = document.createElement('div');
 
         Object.assign(modal.style, {
@@ -172,16 +218,36 @@
             cursor: 'zoom-out'
         });
 
-        const img = document.createElement('img');
-        img.src = src;
+        if (type === 'video') {
 
-        Object.assign(img.style, {
-            maxWidth: '90%',
-            maxHeight: '90%',
-            borderRadius: '12px'
-        });
+            const video = document.createElement('video');
 
-        modal.appendChild(img);
+            video.src = src;
+            video.controls = true;
+            video.autoplay = true;
+
+            Object.assign(video.style, {
+                maxWidth: '90%',
+                maxHeight: '90%',
+                borderRadius: '12px'
+            });
+
+            modal.appendChild(video);
+        }
+        else {
+
+            const img = document.createElement('img');
+
+            img.src = src;
+
+            Object.assign(img.style, {
+                maxWidth: '90%',
+                maxHeight: '90%',
+                borderRadius: '12px'
+            });
+
+            modal.appendChild(img);
+        }
 
         modal.addEventListener('click', () => modal.remove());
 
