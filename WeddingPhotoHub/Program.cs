@@ -23,7 +23,24 @@ builder.Services.AddScoped<CloudinaryService>();
 
 builder.Services.AddAuthorization();
 
-var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+
+if (string.IsNullOrWhiteSpace(databaseUrl))
+    throw new Exception("DATABASE_URL no configurada");
+
+// Parseo correcto para Render PostgreSQL
+var uri = new Uri(databaseUrl);
+
+var userInfo = uri.UserInfo.Split(':');
+
+var host = uri.Host;
+var port = uri.Port;
+var user = userInfo[0];
+var password = userInfo[1];
+var database = uri.AbsolutePath.TrimStart('/');
+
+var connectionString =
+    $"Host={host};Port={port};Username={user};Password={password};Database={database};SSL Mode=Require;Trust Server Certificate=true";
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
