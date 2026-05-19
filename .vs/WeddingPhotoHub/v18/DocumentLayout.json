@@ -3,8 +3,8 @@
   "WorkspaceRootPath": "C:\\Users\\usuario\\source\\repos\\WeddingPhotoHub\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{ECED47FC-B97B-4D30-B2E8-C4A8B4169D0D}|WeddingPhotoHub\\WeddingPhotoHub.csproj|c:\\users\\usuario\\source\\repos\\weddingphotohub\\weddingphotohub\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{ECED47FC-B97B-4D30-B2E8-C4A8B4169D0D}|WeddingPhotoHub\\WeddingPhotoHub.csproj|solutionrelative:weddingphotohub\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{ECED47FC-B97B-4D30-B2E8-C4A8B4169D0D}|WeddingPhotoHub\\WeddingPhotoHub.csproj|c:\\users\\usuario\\source\\repos\\weddingphotohub\\weddingphotohub\\views\\upload\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{ECED47FC-B97B-4D30-B2E8-C4A8B4169D0D}|WeddingPhotoHub\\WeddingPhotoHub.csproj|solutionrelative:weddingphotohub\\views\\upload\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     }
   ],
   "DocumentGroupContainers": [
@@ -23,14 +23,14 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\usuario\\source\\repos\\WeddingPhotoHub\\WeddingPhotoHub\\Program.cs",
-              "RelativeDocumentMoniker": "WeddingPhotoHub\\Program.cs",
-              "ToolTip": "C:\\Users\\usuario\\source\\repos\\WeddingPhotoHub\\WeddingPhotoHub\\Program.cs",
-              "RelativeToolTip": "WeddingPhotoHub\\Program.cs",
-              "ViewState": "AgIAABoAAAAAAAAAAAAYwC4AAABAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-19T03:37:41.851Z",
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\usuario\\source\\repos\\WeddingPhotoHub\\WeddingPhotoHub\\Views\\Upload\\Index.cshtml",
+              "RelativeDocumentMoniker": "WeddingPhotoHub\\Views\\Upload\\Index.cshtml",
+              "ToolTip": "C:\\Users\\usuario\\source\\repos\\WeddingPhotoHub\\WeddingPhotoHub\\Views\\Upload\\Index.cshtml",
+              "RelativeToolTip": "WeddingPhotoHub\\Views\\Upload\\Index.cshtml",
+              "ViewState": "AgIAAB4AAAAAAAAAAAAAACcAAAA5AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-05-19T04:42:24.739Z",
               "EditorCaption": ""
             }
           ]
