@@ -29,15 +29,22 @@ if (string.IsNullOrWhiteSpace(databaseUrl))
     throw new Exception("DATABASE_URL no configurada");
 
 // Parseo correcto para Render PostgreSQL
-var uri = new Uri(databaseUrl);
+var databas = Environment.GetEnvironmentVariable("DATABASE_URL");
+
+if (string.IsNullOrWhiteSpace(databas))
+    throw new Exception("DATABASE_URL no configurada");
+
+var uri = new Uri(databas);
 
 var userInfo = uri.UserInfo.Split(':');
 
 var host = uri.Host;
-var port = uri.Port;
 var user = userInfo[0];
 var password = userInfo[1];
 var database = uri.AbsolutePath.TrimStart('/');
+
+// 👇 ESTA ES LA CLAVE DEL FIX
+var port = (uri.Port > 0 && uri.Port < 65536) ? uri.Port : 5432;
 
 var connectionString =
     $"Host={host};Port={port};Username={user};Password={password};Database={database};SSL Mode=Require;Trust Server Certificate=true";
