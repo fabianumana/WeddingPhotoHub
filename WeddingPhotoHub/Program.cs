@@ -23,18 +23,7 @@ builder.Services.AddScoped<CloudinaryService>();
 
 builder.Services.AddAuthorization();
 
-var raw = Environment.GetEnvironmentVariable("DATABASE_URL");
-
-if (string.IsNullOrWhiteSpace(raw))
-    throw new Exception("DATABASE_URL no configurada");
-
-// Convertir formato Render -> Npgsql
-var connectionString = raw.Replace("postgresql://", "Host=")
-    .Replace("/", ";Database=")
-    .Replace("@", ";Username=")
-    .Replace(":", ";Port=")
-    .Replace(";", " ")
-    .Replace(" ", ";Password=");
+var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
