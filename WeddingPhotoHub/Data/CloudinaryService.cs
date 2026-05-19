@@ -74,34 +74,36 @@ namespace WeddingPhotoHub.Data
         // 🗑 DELETE MEDIA
         public void DeleteMedia(string publicId, string? contentType)
         {
-            if (string.IsNullOrWhiteSpace(publicId))
-                return;
-
-            DeletionParams deletionParams;
-
-            // 🔥 SI ES VIDEO
-            if (!string.IsNullOrWhiteSpace(contentType) &&
-                contentType.StartsWith("video"))
+            try
             {
-                deletionParams = new DeletionParams(publicId)
+                if (string.IsNullOrWhiteSpace(publicId))
+                    return;
+
+                DeletionParams deletionParams;
+
+                if (!string.IsNullOrWhiteSpace(contentType) &&
+                    contentType.StartsWith("video"))
                 {
-                    ResourceType = ResourceType.Video
-                };
-            }
-            else
-            {
-                // 🔥 SI ES IMAGEN
-                deletionParams = new DeletionParams(publicId)
+                    deletionParams = new DeletionParams(publicId)
+                    {
+                        ResourceType = ResourceType.Video
+                    };
+                }
+                else
                 {
-                    ResourceType = ResourceType.Image
-                };
+                    deletionParams = new DeletionParams(publicId)
+                    {
+                        ResourceType = ResourceType.Image
+                    };
+                }
+
+                var result = _cloudinary.Destroy(deletionParams);
+
+                Console.WriteLine($"Cloudinary delete result: {result.Result}");
             }
-
-            var result = _cloudinary.Destroy(deletionParams);
-
-            if (result.StatusCode != System.Net.HttpStatusCode.OK)
+            catch (Exception ex)
             {
-                Console.WriteLine("Error eliminando archivo en Cloudinary");
+                Console.WriteLine($"Error eliminando archivo: {ex.Message}");
             }
         }
     }

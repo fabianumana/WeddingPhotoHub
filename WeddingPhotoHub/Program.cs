@@ -23,8 +23,12 @@ builder.Services.AddScoped<CloudinaryService>();
 
 builder.Services.AddAuthorization();
 
+var connectionString =
+    builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? Environment.GetEnvironmentVariable("DATABASE_URL");
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(connectionString));
 
 builder.Services.Configure<FormOptions>(options =>
 {

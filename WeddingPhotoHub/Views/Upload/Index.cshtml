@@ -83,8 +83,11 @@
                             {
                                 <video controls
                                        class="img-fluid rounded-top preview-video"
-                                       preload="metadata">
+                                       preload="metadata"
+                                       onclick="openModal('@foto.Url', 'video')">
+
                                     <source src="@foto.Url" type="@foto.ContentType" />
+
                                 </video>
                             }
                             else

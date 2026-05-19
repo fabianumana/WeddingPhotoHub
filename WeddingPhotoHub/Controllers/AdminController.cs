@@ -63,7 +63,7 @@ namespace WeddingPhotoHub.Controllers
             _context.Fotos.Remove(foto);
             _context.SaveChanges();
 
-            TempData["Mensaje"] = "Imagen eliminada correctamente.";
+            TempData["Mensaje"] = "Archivo eliminado correctamente.";
 
             return RedirectToAction("Dashboard");
         }
